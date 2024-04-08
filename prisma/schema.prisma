@@ -1,0 +1,111 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String       @id @default(uuid())
+  firstName      String
+  lastName       String
+  email           String       @unique
+  password        String       @unique
+  isAdmin         Boolean
+  referralNumber  String       @unique
+  saldo           Int
+  discountVoucher         DiscountVoucher[]
+  pointVoucher PointVoucher[]
+  events          Event[]
+  reviews         Review[]
+  transaction     Transaction[]
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+model PointVoucher {
+  id              String       @id @default(uuid())
+  discount        Int
+  user            User         @relation(fields: [userId], references: [id])
+  userId          String
+  expires         DateTime
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+model DiscountVoucher {
+  id              String       @id @default(uuid())
+  discount        Int
+  user            User         @relation(fields: [userId], references: [id])
+  userId          String
+  expires         DateTime
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+model EventVoucher {
+  id              String       @id @default(uuid())
+  discount Int
+  code String
+  eventId String @unique
+  event Event @relation(fields: [eventId], references: [id])
+}
+
+model Event {
+  id              String       @id @default(uuid())
+  image           String
+  eventName       String
+  description     String
+  address         String
+  city            String
+  category        Category @relation(fields: [categoryId], references: [id])
+  categoryId      String 
+  price           Int
+  eventDate       DateTime
+  availableTickets Int
+  reviews         Review[]
+  user            User         @relation(fields: [userId], references: [id])
+  userId          String
+  transaction     Transaction[]
+  eventVoucher   EventVoucher? 
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+model Category {
+  id String @id @default(uuid())
+  name String 
+  events Event[]
+}
+
+model Review {
+  id              String       @id @default(uuid())
+  content         String
+  rating          Int
+  user            User         @relation(fields: [userId], references: [id])
+  userId          String
+  event           Event        @relation(fields: [eventId], references: [id])
+  eventId         String
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+model Transaction {
+  id              String       @id @default(uuid())
+  user            User         @relation(fields: [userId], references: [id])
+  userId          String
+  event           Event        @relation(fields: [eventId], references: [id])
+  eventId         String
+  total           Int
+  qty             Int
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
